@@ -18,7 +18,7 @@ class StockMarket:
     def run(self):
         self.quit = False
         while (self.quit == False):
-            time.sleep(random.randrange(5) + 1)            
+            time.sleep(random.randrange(5) + 1)
 
             # Choose a stock to fluctuate at random, +/- $5.00
             symbol = self.symbols[random.randrange(len(self.symbols))]
@@ -34,6 +34,8 @@ def publish(symbol, adjustment, price):
     print("PUBLISH: " + str(symbol) + " " + str(adjustment) + " " + str(price))
 
 if __name__ == "__main__":
-    sm = StockMarket(publish, ["AMZN", "GOOG", "MSFT"])
-    threading.Thread(target=sm.run).start()
+    sm1 = StockMarket(publish, ["AMZN", "GOOG", "MSFT"])
+    sm2 = StockMarket(publish, ["GE", "GMC", "FORD"])
+    threading.Thread(target=sm1.run).start()
+    threading.Thread(target=sm2.run).start()
     print("Press Ctrl-C to terminate")
