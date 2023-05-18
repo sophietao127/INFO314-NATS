@@ -33,6 +33,9 @@ class StockMarket:
 def publish(symbol, adjustment, price):
     print("PUBLISH: " + str(symbol) + " " + str(adjustment) + " " + str(price))
 
+# publish to client
+# call the class StockPublisher
+
 if __name__ == "__main__":
     sm1 = StockMarket(publish, ["AMZN", "GOOG", "MSFT"])
     sm2 = StockMarket(publish, ["GE", "GMC", "FORD"])

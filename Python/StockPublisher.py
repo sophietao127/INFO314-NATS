@@ -1,6 +1,9 @@
 from pynats import NATSClient
 import sys
 
+"""
+connect to the NATS server and spin up three "stock markets":
+"""
 def main(natsurl):
     with NATSClient(url=natsurl) as nc:
         nc.connect()

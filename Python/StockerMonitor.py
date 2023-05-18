@@ -1,7 +1,7 @@
 from pynats import NATSClient
 import sys
 
-# Subscribe
+# Previously: Subscribe.py
 def callback(msg):
     print("Received a message with subject: " + msg.subject)
 

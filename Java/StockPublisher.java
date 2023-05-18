@@ -24,5 +24,5 @@ public class StockPublisher {
     // When you have the NATS code here to publish a message, put "publishMessage" in
     // the above where "publishDebugOutput" currently is
     public synchronized static void publishMessage(String symbol, int adjustment, int price) {
-    } 
+    }
 }
