@@ -35,6 +35,7 @@ def publish(symbol, adjustment, price):
 
 # publish to client
 # call the class StockPublisher
+# def publishFromServer():
 
 if __name__ == "__main__":
     sm1 = StockMarket(publish, ["AMZN", "GOOG", "MSFT"])
