@@ -1,0 +1,10 @@
+Timestamp: 1684583360.418135, Adjustment: -2, Current Price: 416
+Timestamp: 1684583362.4237492, Adjustment: -2, Current Price: 414
+Timestamp: 1684583364.427129, Adjustment: 4, Current Price: 418
+Timestamp: 1684583368.438313, Adjustment: -3, Current Price: 415
+Timestamp: 1684583370.439876, Adjustment: 1, Current Price: 416
+Timestamp: 1684583376.454168, Adjustment: -2, Current Price: 414
+Timestamp: 1684583378.4601011, Adjustment: -3, Current Price: 411
+Timestamp: 1684583386.477887, Adjustment: -3, Current Price: 408
+Timestamp: 1684583388.4839559, Adjustment: 2, Current Price: 410
+Timestamp: 1684583394.5009038, Adjustment: -2, Current Price: 408
