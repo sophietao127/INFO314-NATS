@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 import time
 import StockBroker
 import threading
+from collections import defaultdict
 
 # each client will have a portfolio of stocks and a "strategy" as to when to buy or sell particular stocks.
 # StockBrokers are uniquely named (give each StockBroker a name constructor parameter that is used to identify this StockBroker everywhere in the system), and clients choose which StockBroker they use. When the client wishes
@@ -17,23 +18,24 @@ class StockerBrokerClient:
         self.portfolio = 'portfolio-' + name + '.xml'
         self.strategy = 'strategy-' + name + '.xml'
         self.natsurl = "nats://localhost:4222"
-        self.threshold = {}
+        self.threshold = defaultdict(list)
 
         self.symbols_num = self.getSymbols()  #{'MSFT': '500', 'AMZN': '500', 'GOOG': '500'}
         # print(self.symbols_num)
         self.market_price = None     # for a specific symbol while runing the for loop below
 
-        self.getThreshold()
-        # with NATSClient(url=self.natsurl) as nc:
-        #     nc.connect()
-        #     print("Check the StockPublisher:")
+        self.getThreshold()   # {'MSFT': ['500', '50', '100', '20']}
 
-        #     for symbol in self.symbols_num.keys():
-        #         nc.subscribe(subject=symbol, callback=self.callback)
+        with NATSClient(url=self.natsurl) as nc:
+            nc.connect()
+            print("Check the StockPublisher:")
 
-        #     nc.wait()
+            for symbol in self.symbols_num.keys():
+                nc.subscribe(subject=symbol, callback=self.callback)
 
-        # input("Press Enter to terminate")
+            nc.wait()
+
+        input("Press Enter to terminate")
 
     def callback(self, msg):
         print("Received a message with subject: " + msg.subject)
@@ -46,7 +48,8 @@ class StockerBrokerClient:
         print(symbol, price)
         self.market_price = price
 
-        # check the strategy - call checkTreshold()
+        # check if the current price of the current symbol reach to threshold
+        self.checkThreshold(symbol, price)
 
     def getSymbols(self):
         # open portfolio.xml to get all symbols - return the list
@@ -66,16 +69,33 @@ class StockerBrokerClient:
         root = tree.getroot()
 
         for children in root:
+            curSymbol = None
             for child in children:
-                print(child.tag, child.text)
+                if child.tag == 'stock':
+                    curSymbol = child.text
+                elif child.tag == 'above':
+                    self.threshold[curSymbol].append(child.text)
+                elif child.tag == 'below':
+                    self.threshold[curSymbol].append(child.text)
+                elif child.tag == 'buy':
+                    self.threshold[curSymbol].append(child.text)
 
-            # symbol, num = child.attrib['symbol'], child.text
+        # update sell information
+        for symbol, num in self.symbols_num.items():
+            self.threshold[symbol][1] = num
 
+    def checkThreshold(self, symbol, price):
+        large, small = self.threshold[symbol][0], self.threshold[symbol][2]
+        sell, buy = self.threshold[symbol][1], self.threshold[symbol][3]
+        req = None
+        print(large, small, buy)
 
-
-
-    def checkThreshold(self):
-        pass
+        if price > large: # sell
+            req = "<order><sell symbol={s} amount={num} /></order>".format(s=symbol, num=sell)
+            print(req)
+        elif price < small: #buy
+            req = "<order><sell symbol={s} amount={num} /></order>".format(s=symbol, num=buy)
+            print(req)
 
     def updatePortfolio(self):
         filename = self.portfolio
