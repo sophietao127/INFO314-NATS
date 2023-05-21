@@ -5,7 +5,7 @@ import StockBroker
 import threading
 from collections import defaultdict
 
-# each client will have a portfolio of stocks and a "strategy" as to when to buy or sell particular stocks.
+# Each client will have a portfolio of stocks and a "strategy" as to when to buy or sell particular stocks.
 # StockBrokers are uniquely named (give each StockBroker a name constructor parameter that is used to identify this StockBroker everywhere in the system), and clients choose which StockBroker they use. When the client wishes
 # they will send "buy" messages that look like the following:
 # nats: request(), msgpack()
@@ -91,23 +91,27 @@ class StockerBrokerClient:
         print(large, small, buy)
 
         if price > large: # sell
-            req = "<order><sell symbol={s} amount={num} /></order>".format(s=symbol, num=sell)
-            print(req)
+            req = "<order><sell symbol='{s}' amount='{num}'/></order>".format(s=symbol, num=sell)
+            req = bytes(req, 'utf-8')
+            # print(req)
+            self.workWithBroker(req)
         elif price < small: #buy
-            req = "<order><sell symbol={s} amount={num} /></order>".format(s=symbol, num=buy)
-            print(req)
+            req = "<order><buy symbol='{s}' amount='{num}'/></order>".format(s=symbol, num=buy)
+            req = bytes(req, 'utf-8')
+            # print(req)
+            self.workWithBroker(req)
 
     def updatePortfolio(self):
         filename = self.portfolio
         # read and update the file
 
-    def workWithBroker(self, req = None):
+    def workWithBroker(self, req):
         """
         Received a request on 'test-subject:
         The request is: <order><buy symbol='MSFT' amount='40' /></order>
         reply firslt!!
         """
-        req = b"<order><buy symbol='MSFT' amount='40' /></order>"
+        # req = b"<order><buy symbol='MSFT' amount='40' /></order>"
         broker = self.broker
 
         def worker(name):
