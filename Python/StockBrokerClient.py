@@ -17,17 +17,19 @@ class StockerBrokerClient:
         self.portfolio = 'portfolio-' + name + '.xml'
         self.strategy = 'strategy-' + name + '.xml'
         self.natsurl = "nats://localhost:4222"
-        self.symbols_num = None
+        self.threshold = {}
 
         self.symbols_num = self.getSymbols()  #{'MSFT': '500', 'AMZN': '500', 'GOOG': '500'}
         # print(self.symbols_num)
+        self.market_price = None     # for a specific symbol while runing the for loop below
 
+        self.getThreshold()
         # with NATSClient(url=self.natsurl) as nc:
         #     nc.connect()
-        #     print("connected")
+        #     print("Check the StockPublisher:")
 
-        #     # just test 1 symbol
-        #     nc.subscribe(subject="GE", callback=self.callback)
+        #     for symbol in self.symbols_num.keys():
+        #         nc.subscribe(subject=symbol, callback=self.callback)
 
         #     nc.wait()
 
@@ -36,7 +38,15 @@ class StockerBrokerClient:
     def callback(self, msg):
         print("Received a message with subject: " + msg.subject)
         content = msg.payload.decode()
-        # print(content)
+        xml_data = content
+
+        myroot = ET.fromstring(xml_data)   # parse xml file
+        symbol = myroot[0][0].text
+        price = myroot[0][2].text
+        print(symbol, price)
+        self.market_price = price
+
+        # check the strategy - call checkTreshold()
 
     def getSymbols(self):
         # open portfolio.xml to get all symbols - return the list
@@ -48,8 +58,21 @@ class StockerBrokerClient:
         for child in root:
             symbol, num = child.attrib['symbol'], child.text
             symbols[symbol] = num
-
         return symbols
+
+    def getThreshold(self):
+        # filename = self.strategy
+        tree = ET.parse("strategy-Mary.xml")
+        root = tree.getroot()
+
+        for children in root:
+            for child in children:
+                print(child.tag, child.text)
+
+            # symbol, num = child.attrib['symbol'], child.text
+
+
+
 
     def checkThreshold(self):
         pass
@@ -58,46 +81,34 @@ class StockerBrokerClient:
         filename = self.portfolio
         # read and update the file
 
-    def getBroker(self):
-        return self.broker
-
-    def workWithBroker(self):
-        # request for test
+    def workWithBroker(self, req = None):
         """
         Received a request on 'test-subject:
         The request is: <order><buy symbol='MSFT' amount='40' /></order>
         reply firslt!!
         """
-        request = b"<order><buy symbol='MSFT' amount='40' /></order>"
+        req = b"<order><buy symbol='MSFT' amount='40' /></order>"
+        broker = self.broker
 
-        def worker():
-            with NATSClient(self.natsurl) as server:
+        def worker(name):
+            broker.worker(name)
 
-                def callback(msg):
-                    print(f"Received a request on '{msg.subject}:")
-                    print(f"The request is: {msg.payload.decode()}")
-                    server.publish(msg.reply, payload=b"reply firslt!!")
-
-                server.subscribe(
-                    "test-subject", callback=callback, queue="test-queue", max_messages=2
-                )
-                server.wait(count=1)
-                # client.wait()
-
-
-        t = threading.Thread(target=worker)
+        # run thread to call the StockBroker
+        t = threading.Thread(target=worker, args=(self.name,))
         t.start()
 
         time.sleep(1)
+
         with NATSClient(self.natsurl) as client:
         # payload likes a "request"
-            resp = client.request("test-subject", payload=request)
+            resp = client.request(self.name, payload=req)
             reply = resp.payload.decode()
             print(reply)
+
         t.join()
 
 
 if __name__ == "__main__":
     broker_alex =StockBroker.Broker("Alex")
     client_mary = StockerBrokerClient("Mary", broker_alex)
-    client_mary.workWithBroker();
+    # client_mary.workWithBroker();

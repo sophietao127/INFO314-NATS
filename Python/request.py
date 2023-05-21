@@ -4,7 +4,7 @@ import threading
 import time
 
 def test_request(nats_plain_url):
-    def worker():
+    def worker(name):
         with NATSClient(nats_plain_url) as server:
 
             def callback(msg):
@@ -13,12 +13,12 @@ def test_request(nats_plain_url):
                 server.publish(msg.reply, payload=b"reply firslt!!")
 
             server.subscribe(
-                "test-subject", callback=callback, queue="test-queue", max_messages=2
+                subject=name, callback=callback, queue="test-queue", max_messages=2
             )
             server.wait(count=1)
             # client.wait()
 
-    t = threading.Thread(target=worker)
+    t = threading.Thread(target=worker, args=("test-subject",))
     t.start()
 
     time.sleep(1)
