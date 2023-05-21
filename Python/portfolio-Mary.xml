@@ -1,5 +1,5 @@
 <portfolio>
-    <stock symbol="MSFT">50</stock>
-    <stock symbol="AMZN">50</stock>
     <stock symbol="GOOG">50</stock>
-</portfolio>
+    <stock symbol="AMZN">60</stock>
+    <stock symbol="GE">30</stock>
+    </portfolio>
