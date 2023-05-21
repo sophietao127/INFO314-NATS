@@ -13,10 +13,15 @@ def main(natsurl):
         nc.connect()
         print("connected")
 
-        nc.subscribe(subject="*", callback=callback)
+        nc.subscribe(subject="info314", callback=callback)
+        nc.publish(subject="info314", payload=bytes("hello world1", "UTF-8"));
 
-        # nc.wait(count=2)  # wait for 1 message
-        nc.wait()
+        resp = nc.request("info314", payload=b"test-payload")
+        msg = resp.sid()
+        print(msg)
+
+        nc.wait(count=1)  # wait for 1 message
+        # nc.wait()
 
     input("Press Enter to terminate")
 
