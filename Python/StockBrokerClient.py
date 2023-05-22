@@ -12,8 +12,10 @@ import os
 # nats: request(), msgpack()
 
 
-class StockerBrokerClient:
+class Client(threading.Thread):
     def __init__(self, name, broker, natsurl) -> None:
+        threading.Thread.__init__(self)
+
         self.name = name
         self.broker = broker    # an instance of a StockBroker
         self.portfolio = 'portfolio-' + name + '.xml'
@@ -27,9 +29,10 @@ class StockerBrokerClient:
 
         self.getThreshold()   # {'MSFT': ['500', '50', '100', '20']}
 
+    def run(self):
         with NATSClient(url=self.natsurl) as nc:
             nc.connect()
-            print("Check the StockPublisher:")
+            print(self.name + " Check the StockPublisher:")
 
             for symbol in self.symbols_num.keys():
                 nc.subscribe(subject=symbol, callback=self.callback)
@@ -148,8 +151,10 @@ class StockerBrokerClient:
         reply firslt!!
         """
         broker = self.broker
+        brokerName = broker.name
 
         def worker(name):
+            print("Work with broker: " + brokerName)
             broker.worker(name)
 
         # run thread to call the StockBroker
@@ -170,5 +175,7 @@ class StockerBrokerClient:
 if __name__ == "__main__":
     natsurl = "nats://localhost:4222"
     broker_alex =StockBroker.Broker("Alex", natsurl)
-    client_mary = StockerBrokerClient("Mary", broker_alex, natsurl)
-    # client_mary.workWithBroker();
+    thread1 = Client("Mary", broker_alex, natsurl)
+    thread2 = Client("Ketty", broker_alex, natsurl)
+    thread1.start()
+    thread2.start()
