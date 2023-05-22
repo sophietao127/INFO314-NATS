@@ -4,11 +4,11 @@ import xml.dom.minidom
 # StockBrokers are uniquely named (give each StockBroker a name constructor parameter that is used to identify this StockBroker everywhere in the system), and clients choose which StockBroker they use. When the client wishes
 # they will send "buy" messages that look like the following:
 class Broker:
-    def __init__(self, name) -> None:
+    def __init__(self, name, natsurl) -> None:
         self.name = name
         self.clients = {}
-        self.natsurl = "nats://localhost:4222"
-        self.curPrce = None
+        self.natsurl = natsurl
+        self.curPrice = None
 
     def callback(self, msg):
         # print("Received a message with subject: " + msg.subject)
@@ -83,3 +83,8 @@ class Broker:
                 name, callback=callback, queue="test-queue", max_messages=2
             )
             server.wait(count=1)
+
+
+if __name__ == "__main__":
+    natsurl = "nats://localhost:4222"
+    broker_alex = Broker("Alex", natsurl)

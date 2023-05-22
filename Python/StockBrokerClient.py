@@ -13,12 +13,12 @@ import os
 
 
 class StockerBrokerClient:
-    def __init__(self, name, broker) -> None:
+    def __init__(self, name, broker, natsurl) -> None:
         self.name = name
         self.broker = broker    # an instance of a StockBroker
         self.portfolio = 'portfolio-' + name + '.xml'
         self.strategy = 'strategy-' + name + '.xml'
-        self.natsurl = "nats://localhost:4222"
+        self.natsurl = natsurl
         self.threshold = defaultdict(list)
 
         self.symbols_num = self.getSymbols()  #{'MSFT': '500', 'AMZN': '500', 'GOOG': '500'}
@@ -66,8 +66,8 @@ class StockerBrokerClient:
 
 
     def getThreshold(self):
-        # filename = self.strategy
-        tree = ET.parse("strategy-Mary.xml")
+        filename = self.strategy
+        tree = ET.parse(filename)
         root = tree.getroot()
 
         for children in root:
@@ -168,6 +168,7 @@ class StockerBrokerClient:
 
 
 if __name__ == "__main__":
-    broker_alex =StockBroker.Broker("Alex")
-    client_mary = StockerBrokerClient("Mary", broker_alex)
+    natsurl = "nats://localhost:4222"
+    broker_alex =StockBroker.Broker("Alex", natsurl)
+    client_mary = StockerBrokerClient("Mary", broker_alex, natsurl)
     # client_mary.workWithBroker();

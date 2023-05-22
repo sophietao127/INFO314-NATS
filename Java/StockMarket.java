@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.*;
@@ -7,7 +8,7 @@ import java.util.function.*;
  * it defines a lambda type that means we can pass in a three-argument
  * method (instance or static) as a parameter to the StockMarket
  * constructor. See the StockPublisher code for an example.
- * 
+ *
  * In general, "function parameters" like this are a powerful way
  * to combine functionality without using traditional inheritance--in
  * essence, you are "customizing" the behavior of the recipient
@@ -15,7 +16,7 @@ import java.util.function.*;
  */
 @FunctionalInterface
 interface Function3<T1, T2, T3> {
-    public void apply(T1 one, T2 two, T3 three);
+    public void apply(T1 one, T2 two, T3 three) throws Exception;
 }
 
 /**
@@ -33,11 +34,11 @@ public class StockMarket implements Runnable {
 
     public Function3<String, Integer, Integer> publish = null;
         // You must provide the function instance that does the NATS work
-  
+
     public StockMarket(Function3<String, Integer, Integer> publishFn, String... symbols)
         throws java.io.IOException, InterruptedException {
       this.symbols = symbols;
-  
+
       // Set up initial stock prices
       Random startingPriceRandom = new Random();
       for (String symbol : symbols) {
@@ -48,27 +49,27 @@ public class StockMarket implements Runnable {
 
       this.publish = publishFn;
     }
-  
+
     public void run() {
       Random waiter = new Random();
       Random stockChooser = new Random();
       Random priceFluctuator = new Random();
-  
+
       try {
         while (quit.get() == false) {
           // Sleep up to 5 seconds
           Thread.sleep(waiter.nextInt(5) * 1000);
-  
+
           // Choose a stock at random
           String symbol = symbols[stockChooser.nextInt(symbols.length)];
           int price = stocks.get(symbol);
-  
+
           // Choose a fluctuation at random, +/- $5.00
           int adjustment = (priceFluctuator.nextInt(1000) - 500);
           price += adjustment;
-          System.out.println(symbol + " " + price(adjustment) + " = " + price(price));
+//          System.out.println(symbol + " " + price(adjustment) + " = " + price(price));
           stocks.put(symbol, price);
-  
+
           // STUDENT: Publish the change to the NATS server
           publish.apply(symbol, adjustment, price);
         }
@@ -77,8 +78,10 @@ public class StockMarket implements Runnable {
         // These exceptions are designed to do exactly this:
         // interrupt us! Nothing bad to handle here. Just exit.
       }
+      catch (Exception e) {
+        System.out.println(e.getStackTrace());
+      }
     }
     // Convenient method to transform pennies into USD
     public String price(int price) { return "$" + (price / 100.f); }
 }
-  
