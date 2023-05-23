@@ -93,18 +93,14 @@ if __name__ == "__main__":
     broker_alex = Broker("Alex", natsurl)
     broker_ted = Broker("ted", natsurl)
 
-    client_mary = StockBrokerClient.Client("Mary", broker_alex, natsurl)
-    client_ketty = StockBrokerClient.Client("Ketty", broker_alex, natsurl)
-    t1 = threading.Thread(client_mary)
-    t2 = threading.Thread(client_ketty)
+#
+    thread1 = StockBrokerClient.Client("Mary", broker_alex, natsurl)
+    thread2 = StockBrokerClient.Client("Ketty", broker_alex, natsurl)
 
-    t1.start()
-    t2.start()
+    thread3 = StockBrokerClient.Client("Bob", broker_ted, natsurl)
+    thread4 = StockBrokerClient.Client("Sara", broker_ted, natsurl)
 
-    # client_mary = StockBrokerClient.Client("Mary", broker_alex, natsurl)
-    # client_ketty = StockBrokerClient.Client("Ketty", broker_alex, natsurl)
-    # t1 = threading.Thread(client_mary)
-    # t2 = threading.Thread(client_ketty)
-
-    # t1.start()
-    # t2.start()
+    thread1.start()
+    thread2.start()
+    thread3.start()
+    thread4.start()
